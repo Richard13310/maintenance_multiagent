@@ -1,55 +1,55 @@
-知识问答和闲聊系统框架
-本项目是基于 LangGraph 构建的设备运维场景智能体系统，集成知识问答与闲聊双核心能力，为 LangGraph 多智能体开发的学习版实现。
-一、系统整体架构
-用户输入经意图分类后，分流至知识问答或闲聊系统处理：
-用户输入 → 意图分类（intent_cls）
-分支处理：
-业务意图 → 知识问答系统（query_agent）：基于 React Agent 调用工具完成业务查询
-闲聊意图 → 闲聊系统（chit_chat）：经安全过滤后调用 LLM 生成闲聊回复
-二、核心模块说明
-1. 知识问答系统（src/agent/query_agent.py）
-功能：处理设备运维相关业务查询（如设备状态、uptime 分析、场站信息查询）
-实现方式：
-通过create_react_agent构建 React Agent
-支持工具调用、多轮对话与上下文管理
-核心特性：
-自动工具调用与结果处理
-上下文自动清理与截断
-API 错误检测与报告
-数据格式化（时间、百分比、表格）
-2. 闲聊系统（src/chit_chat/chit_chat.py）
-功能：处理非业务类日常对话
-实现方式：多层安全防护、意图识别、缓存机制、分层 LLM 调用、上下文管理
-关键组件：
-PreSafetyFilter：前置安全过滤器（检查用户输入）
-PostSafetyFilter：后置安全过滤器（检查 LLM 输出）
-IntentRecognizer：意图识别器（区分业务 / 闲聊）
-ResponseCache：回复缓存（90% 相似度匹配）
-LLMController：LLM 控制器（分层模型调用）
-核心特性：
-特性分类	具体实现
-多层安全防护	敏感词 / 话题分类过滤（前置 + 后置）
-智能意图识别	业务关键词匹配、问候语规则匹配
-性能优化	回复缓存、上下文缓存、分层模型调用
-内容质量控制	100 字字数限制、重复检测、换行处理
-3. 图结构（src/graph/graph_simple.py）
-核心路由逻辑：
-intent_cls → 初步意图分类
-intent_classifier → 进一步判断业务 / 闲聊意图
-query_agent → 知识问答业务处理
-chit_chat → 闲聊对话处理
-三、使用方法
-1. 运行交互式聊天
+知识问答和闲聊系统框架  
+本项目是基于 LangGraph 构建的设备运维场景智能体系统，集成知识问答与闲聊双核心能力，为 LangGraph 多智能体开发的学习版实现。  
+一、系统整体架构  
+用户输入经意图分类后，分流至知识问答或闲聊系统处理：  
+用户输入 → 意图分类（intent_cls）  
+分支处理：  
+业务意图 → 知识问答系统（query_agent）：基于 React Agent 调用工具完成业务查询  
+闲聊意图 → 闲聊系统（chit_chat）：经安全过滤后调用 LLM 生成闲聊回复  
+二、核心模块说明  
+1. 知识问答系统（src/agent/query_agent.py）  
+功能：处理设备运维相关业务查询（如设备状态、uptime 分析、场站信息查询）  
+实现方式：  
+通过create_react_agent构建 React Agent  
+支持工具调用、多轮对话与上下文管理  
+核心特性：  
+自动工具调用与结果处理  
+上下文自动清理与截断  
+API 错误检测与报告  
+数据格式化（时间、百分比、表格）  
+2. 闲聊系统（src/chit_chat/chit_chat.py）  
+功能：处理非业务类日常对话  
+实现方式：多层安全防护、意图识别、缓存机制、分层 LLM 调用、上下文管理  
+关键组件：  
+PreSafetyFilter：前置安全过滤器（检查用户输入）  
+PostSafetyFilter：后置安全过滤器（检查 LLM 输出）  
+IntentRecognizer：意图识别器（区分业务 / 闲聊）  
+ResponseCache：回复缓存（90% 相似度匹配）  
+LLMController：LLM 控制器（分层模型调用）  
+核心特性：  
+特性分类	具体实现  
+多层安全防护	敏感词 / 话题分类过滤（前置 + 后置）  
+智能意图识别	业务关键词匹配、问候语规则匹配  
+性能优化	回复缓存、上下文缓存、分层模型调用  
+内容质量控制	100 字字数限制、重复检测、换行处理  
+3. 图结构（src/graph/graph_simple.py）  
+核心路由逻辑：  
+intent_cls → 初步意图分类  
+intent_classifier → 进一步判断业务 / 闲聊意图  
+query_agent → 知识问答业务处理  
+chit_chat → 闲聊对话处理  
+三、使用方法  
+1. 运行交互式聊天  
 bash
-运行
-cd learning_maintenance
-python chat.py
-2. 功能测试
-知识问答测试：输入业务相关问题
-plaintext
-User: 查询设备状态
-User: uptime分析
-User: 查询场站信息
+运行  
+cd learning_maintenance  
+python chat.py  
+2. 功能测试  
+知识问答测试：输入业务相关问题  
+plaintext  
+User: 查询设备状态  
+User: uptime分析  
+User: 查询场站信息  
 闲聊系统测试：输入日常对话
 plaintext
 User: 你好
