@@ -5,7 +5,7 @@ from src.tools.query_tools import QUERY_TOOLS
 #     "configure_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "配置类工具库"},
 #     "health_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "健康类工具库"},
 #     "information_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "用户相关的信息查询工具库"},
-#     "query_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "获取uptime分析数据的工具"},
+#     "query_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "获取设备分析数据的工具"},
 #     "statistics_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "统计类工具库"},
 #     "device_tool": {"api_key": "", "req_url": "Internal function", "chinese_name": "设备类工具库"},
 #     "log_tools": {"api_key": "", "req_url": "Internal function", "chinese_name": "日志类工具库"},

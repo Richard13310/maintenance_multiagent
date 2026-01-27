@@ -64,6 +64,14 @@ def tool_Structured_Agent_node(builder):
     builder.add_node("tools", ToolNode(tools=QUERY_TOOLS))
     return builder
 
+def should_continue(state: State) -> str:
+    """判断节点：根据AI最新消息，决定「继续调用工具（tools）」还是「终止（END）」"""
+    ai_message = state.messages[-1]
+    # 若AI消息包含工具调用指令→继续执行工具节点；否则→终止循环，返回结果
+    if hasattr(ai_message, "tool_calls") and ai_message.tool_calls:
+        return "tools"
+    return END
+
 def build_graph(llm, intent_str_key: Dict[str, str] = None):
     """构建LangGraph工作流图"""
     builder = StateGraph(State)
@@ -73,11 +81,12 @@ def build_graph(llm, intent_str_key: Dict[str, str] = None):
     builder.add_node("intent_cls", intent_cls_node)
 
     # 两种 agent 设计模式：
-    if agent_sign == 1:
+    if agent_sign == 1: # plan+tool_calls（先规划后执行），灵活度高，但复杂
         tool_Structured_Agent_node(builder)
-    else:
+    elif agent_sign == 2: # chain.bind_tools（规划执行一体） 简易的ReAct agent
         builder.add_node("business", tool_react_agent_node)
-
+    elif agent_sign == 3: # React_agent流程
+        builder.add_node("tools", ToolNode(tools=QUERY_TOOLS))
     # 注册RAG Agent 节点（知识问答）
     builder.add_node("rag_agent", create_simple_rag_node(llm))
 
@@ -107,12 +116,18 @@ def build_graph(llm, intent_str_key: Dict[str, str] = None):
         }
     )
 
+
     # 添加流程连续边
-    if agent_sign == 1:
+    if agent_sign == 1: # plan+tool_calls（先规划后执行），灵活度高，但复杂
         builder.add_edge("business", "tools")
         builder.add_edge("tools", END)
-    else:
+    elif agent_sign == 2: # tool_agent流程，chain.bind_tools（规划执行一体） 简易的ReAct agent
         builder.add_edge("business", END)
+    elif agent_sign == 3: # React_agent流程
+        # React_agent思考节点后，走判断逻辑，决定去工具节点还是终止END
+        builder.add_conditional_edges("business", should_continue)
+        # 上面没有END，则继续下一轮ReAct循环
+        builder.add_edge("tools", "intent_cls")
     builder.add_edge("rag_agent", END)    # RAG Agent 完成
     builder.add_edge("tool_agent", END)  # 工具链 Agent 完成
     builder.add_edge("chit_chat", END)   # 闲聊完成

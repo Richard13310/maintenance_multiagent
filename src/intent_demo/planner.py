@@ -28,7 +28,7 @@ def planner_node(state: State, config):
         "name": step["agent_tool"],
         "args": step.get("params", {}),
         "id": f"call_{idx}"
-    } for idx, step in enumerate(plan.get("steps", []), start=1)]
+    } for idx, step in enumerate(plan.get("steps", []), start=1)]# plan主要是为了拆解出step给出tool_calls的调用顺序再给graph
     tool_str =",".join([i.get("name","") for i in tool_calls])
     return {"plan": plan,"messages": [AIMessage(content=f"调用工具：{tool_str}", tool_calls=tool_calls)]}
 # 只返回部分 key 是完全允许的 ——graph（如 LangChain StateGraph）会自动做「状态合并」：用你返回的新 key 覆盖旧状态，未返回的 key 保留原有值
