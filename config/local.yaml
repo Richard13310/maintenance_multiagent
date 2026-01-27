@@ -1,0 +1,44 @@
+# 大模型配置
+llm:
+  provider: "custom"
+  model: "doubao-seed-1-8-251228" #"Qwen3-32B"
+  api_key: "b1192130-bd42-4f58-9fcf-224bd7c0ee8b" #"autel"
+  api_base: "https://ark.cn-beijing.volces.com/api/v3"
+  local:
+    model_path: ""
+    device: "cuda:0"
+    max_length: 4096
+    temperature: 0.1
+  inference:
+    max_tokens: 2048
+    temperature: 0.1
+    timeout: 30
+    retry_count: 3
+
+# MCP协议配置
+mcp:
+  ops_api_base: ""
+  api_key: ""
+  timeout: 30
+  retry_count: 3
+  connection_pool:
+    max_connections: 50
+    max_keepalive_connections: 20
+    keepalive_expiry: 300
+
+# 工作流配置
+workflow:
+  max_concurrent: 100
+  default_timeout: 300
+  retry_policy:
+    max_retries: 3
+    backoff_factor: 2
+    max_backoff: 60
+
+# 代码说明：
+# 1. 功能定位：本地环境的YAML配置文件，存储LLM、MCP、工作流的具体配置值；
+# 2. 配置内容：
+#    - llm：自定义大模型的API地址、密钥、推理参数；
+#    - mcp：外部业务系统的连接配置；
+#    - workflow：LangGraph工作流的并发、重试策略；
+# 3. 应用场景：开发环境下的配置文件，通过load_yaml_config加载，实现配置与代码的分离。

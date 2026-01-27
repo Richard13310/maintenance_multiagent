@@ -1,0 +1,22 @@
+# Python 相关
+__pycache__/
+*.py[cod]
+*.class
+venv/
+env/
+.venv/
+.pytest_cache/
+
+# IDE 相关
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统相关
+.DS_Store
+Thumbs.db
+
+# 日志/临时文件
+*.log
+*.tmp

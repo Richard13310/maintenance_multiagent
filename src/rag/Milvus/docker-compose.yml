@@ -1,0 +1,51 @@
+services:
+  milvus-standalone:
+    image: milvusdb/milvus:v2.4.5
+    container_name: milvus-standalone
+    restart: always
+    command: ["milvus", "run", "standalone"]  # 强制指定 Milvus 启动命令（核心修复）
+    environment:
+      - MILVUS_MODE=standalone
+      - ETCD_ENDPOINTS=http://etcd:2379
+      - MINIO_ADDRESS=minio:9000
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MILVUS_LOG_LEVEL=info
+    volumes:
+      - ./milvus-data:/var/lib/milvus
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    depends_on:
+      - etcd
+      - minio
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: milvus-etcd
+    restart: always
+    environment:
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    volumes:
+      - ./etcd-data:/etcd-data
+
+  minio:
+    image: minio/minio:latest
+    container_name: milvus-minio
+    restart: always
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - ./minio-data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
