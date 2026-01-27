@@ -8,7 +8,7 @@
 闲聊意图 → 闲聊系统（chit_chat）：经安全过滤后调用 LLM 生成闲聊回复  
 二、核心模块说明  
 1. 知识问答系统（src/agent/query_agent.py）  
-功能：处理设备运维相关业务查询（如设备状态、uptime 分析、场站信息查询）  
+功能：处理设备运维相关业务查询（如设备状态、设备分析、场站信息查询）  
 实现方式：  
 通过create_react_agent构建 React Agent  
 支持工具调用、多轮对话与上下文管理  
@@ -48,7 +48,7 @@ python chat.py
 知识问答测试：输入业务相关问题  
 plaintext  
 User: 查询设备状态    
-User: uptime分析    
+User: 设备分析    
 User: 查询场站信息    
 闲聊系统测试：输入日常对话  
 plaintext  

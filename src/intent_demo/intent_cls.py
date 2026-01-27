@@ -13,7 +13,7 @@ def build_intent_chain(llm, intent_str_key: Dict[str, str]):
         "你是一个严格的意图分类器。只返回JSON，且必须符合给定的Pydantic。"
         "\n##意图分类期规则："
 "\n1. **业务相关**：如果问题与设备业务相关（涉及场站、设备、运维等），则在以下映射中选择最贴近的意图（名称->key）："
-        + "\n".join([f" {k} -> {v}" for k, v in intent_str_key.items()])  # "\n uptime分析列表 -> uptimeList"
+        + "\n".join([f" {k} -> {v}" for k, v in intent_str_key.items()])  # "\n 设备分析列表 -> devicesList"
         + "\n 如果完全没有匹配但与设备业务相关，可以选择最接近的一个"  # "文本1"+"文本2"→"文本1文本2"
 "\n2. **业务无关**：如果问题与设备业务无关，按以下规则分类："
 "\n - **提问类（question）**：所有询问信息的问题，包括但不限于："
