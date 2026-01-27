@@ -2,7 +2,7 @@
 llm:
   provider: "custom"
   model: "doubao-seed-1-8-251228" #"Qwen3-32B"
-  api_key: "b1192130-bd42-4f58-9fcf-224bd7c0ee8b" #"autel"
+  api_key: "b1192130-bd42-4f58-9fcf-224bd7c0ee8b" #
   api_base: "https://ark.cn-beijing.volces.com/api/v3"
   local:
     model_path: ""
