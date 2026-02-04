@@ -70,16 +70,7 @@ def cosine_similarity_score_fn(distance: float) -> float:
 class SimplePDFRAGAgent:
     def __init__(self, llm: Any):
         self.llm = llm
-        self.embeddings = self._init_embeddings()
-        self.vector_store = self._init_vector_store()  # 新版Milvus
-        self.text_splitter = self._init_text_splitter()
-        self.retriever = self._init_retriever()
-        self.rag_chain = self._init_rag_chain()
-
-    # 初始化BGE嵌入模型（无无效参数）
-    def _init_embeddings(self) -> HuggingFaceEmbeddings:
-        print(f"📥 正在加载BGE模型：{config.EMBEDDING_MODEL}")
-        return HuggingFaceEmbeddings(
+        self.embeddings = HuggingFaceEmbeddings(
             model_name=config.EMBEDDING_MODEL,
             model_kwargs={
                 "device": config.EMBEDDING_DEVICE,
@@ -89,11 +80,7 @@ class SimplePDFRAGAgent:
                 "normalize_embeddings": True  # BGE必须归一化，确保相似度计算准确
             },
         )
-
-    # 初始化新版Milvus向量库（无overwrite参数错误）
-    def _init_vector_store(self) -> MilvusVectorStore:
-        print(f"🔌 正在连接Milvus：{config.MILVUS_HOST}:{config.MILVUS_PORT}")
-        return MilvusVectorStore(
+        self.vector_store = MilvusVectorStore(
             embedding_function=self.embeddings,
             connection_args={
                 "host": config.MILVUS_HOST,
@@ -106,17 +93,12 @@ class SimplePDFRAGAgent:
             drop_old=False,  # 替代旧版overwrite：False=不删除旧集合（True=删除重建）
         )
 
-    # 初始化文本切片器
-    def _init_text_splitter(self) -> RecursiveCharacterTextSplitter:
-        return RecursiveCharacterTextSplitter(
+        self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=config.CHUNK_SIZE,
             chunk_overlap=config.CHUNK_OVERLAP,
             separators=["\n\n", "\n", "。", "！", "？", "；", "，", " "],
         )
-
-    # 初始化检索器（带评分函数，解决NotImplementedError）
-    def _init_retriever(self) -> VectorStoreRetriever:
-        return self.vector_store.as_retriever(
+        self.retriever = self.vector_store.as_retriever(
             search_kwargs={
                 "k": config.SEARCH_K,
                 "score_threshold": config.SEARCH_SCORE_THRESHOLD,
@@ -124,30 +106,25 @@ class SimplePDFRAGAgent:
             },
             search_type="similarity_score_threshold",
         )
-
-    # 初始化RAG生成链
-    def _init_rag_chain(self):
-        prompt = ChatPromptTemplate.from_messages([
+        self.document_prompt = ChatPromptTemplate.from_messages([
             ("system", """你是设备运维助手，严格基于提供的PDF文档内容回答问题。
-- 仅使用上下文里的信息，不编造额外内容
-- 技术问题按「问题分析→解决方案→操作步骤」的结构回答
-- 若上下文无相关信息，直接回复"无法回答该问题"
-<context>
-{context}
-</context>"""),
+                - 仅使用上下文里的信息，不编造额外内容
+                - 技术问题按「问题分析→解决方案→操作步骤」的结构回答
+                - 若上下文无相关信息，直接回复"无法回答该问题"
+                <context>
+                {context}
+                </context>"""),
             MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}")
         ])
-
-        document_chain = create_stuff_documents_chain(
+        self.document_chain = create_stuff_documents_chain(
             self.llm,
-            prompt,
+            self.document_prompt,
             document_prompt=ChatPromptTemplate.from_messages([
                 ("system", "[文档来源：{{doc.metadata.source}}] {{doc.page_content}}")
             ])
         )
-
-        return create_retrieval_chain(self.retriever, document_chain, rephrase_question=False)
+        self.rag_chain = create_retrieval_chain(self.retriever, self.document_chain, rephrase_question=False) # 关闭问题重写功能
 
     # 加载PDF并入库
     def load_pdf_to_db(self, pdf_path: str) -> int:
